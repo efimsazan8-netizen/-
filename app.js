@@ -13,6 +13,8 @@
   let analyser;
   let frequencyData;
   let glowFrame;
+  let bassFloor;
+  let beatPulse = 0;
 
   function animateMusicGlow() {
     if (!analyser || !frequencyData) return;
@@ -21,24 +23,31 @@
     let bass = 0;
     for (let i = 0; i < bassBins; i++) bass += frequencyData[i];
     bass /= bassBins * 255;
-    const beat = Math.min(1, bass * 2.8);
+    if (bassFloor === undefined) bassFloor = bass;
+    bassFloor += (bass - bassFloor) * 0.045;
+    const hit = Math.max(0, bass - bassFloor - 0.12);
+    const impact = Math.min(1, Math.pow(hit * 9, 1.25));
+    beatPulse = Math.max(impact, beatPulse * 0.88);
+    const beat = beatPulse;
     document.documentElement.style.setProperty('--music-beat', beat.toFixed(3));
-    document.documentElement.style.setProperty('--music-opacity', (0.22 + beat * 0.72).toFixed(3));
-    document.documentElement.style.setProperty('--music-scale', (0.85 + beat * 0.3).toFixed(3));
+    document.documentElement.style.setProperty('--music-opacity', (0.34 + beat * 0.52).toFixed(3));
+    document.documentElement.style.setProperty('--music-scale', (1 + beat * 0.14).toFixed(3));
     glowFrame = requestAnimationFrame(animateMusicGlow);
   }
 
   function startMusicGlow() {
     document.querySelector('.arcade').classList.add('music-playing');
-    document.documentElement.style.setProperty('--music-opacity', '0.94');
+    document.documentElement.style.setProperty('--music-opacity', '0.34');
     document.documentElement.style.setProperty('--music-scale', '1');
+    bassFloor = undefined;
+    beatPulse = 0;
     if (!audioContext) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) return;
       audioContext = new AudioContextClass();
       analyser = audioContext.createAnalyser();
       analyser.fftSize = 1024;
-      analyser.smoothingTimeConstant = 0.72;
+      analyser.smoothingTimeConstant = 0.45;
       frequencyData = new Uint8Array(analyser.frequencyBinCount);
       audioContext.createMediaElementSource(audio.song).connect(analyser);
       analyser.connect(audioContext.destination);
@@ -54,6 +63,8 @@
     document.documentElement.style.setProperty('--music-beat', '0');
     document.documentElement.style.setProperty('--music-opacity', '0');
     document.documentElement.style.setProperty('--music-scale', '1');
+    bassFloor = undefined;
+    beatPulse = 0;
   }
 
   function fadeOut(element, milliseconds = 900) {
