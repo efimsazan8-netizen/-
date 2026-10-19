@@ -5,7 +5,7 @@
   const cabinet = document.querySelector('.cabinet');
   const lastWin = document.querySelector('#last-win');
   const audio = Object.fromEntries(['roulette','spin','stop','lose','win','coins','song'].map(name => [name, document.querySelector(`#${name}-audio`)]));
-  const symbols = ['🐈','🔔','🌸','🐠','🎴','7️⃣','🪭','🍒'];
+  const symbols = Array.from({ length: 8 }, (_, index) => `assets/girls/girl-${index + 1}.jpg`);
   const spinDuration = 7000;
   let busy = false;
   const reelTimers = [];
@@ -29,6 +29,9 @@
   }
 
   function startMusicGlow() {
+    document.querySelector('.arcade').classList.add('music-playing');
+    document.documentElement.style.setProperty('--music-opacity', '0.94');
+    document.documentElement.style.setProperty('--music-scale', '1');
     if (!audioContext) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) return;
@@ -42,7 +45,6 @@
     }
     audioContext.resume().catch(() => {});
     cancelAnimationFrame(glowFrame);
-    document.querySelector('.arcade').classList.add('music-playing');
     animateMusicGlow();
   }
 
@@ -96,9 +98,10 @@
       clearInterval(reelTimers[i]);
       const refreshReel = () => {
         reel.replaceChildren(...Array.from({length: 3}, () => {
-          const icon = document.createElement('span');
+          const icon = document.createElement('img');
           icon.className = 'symbol';
-          icon.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+          icon.src = symbols[Math.floor(Math.random() * symbols.length)];
+          icon.alt = '';
           return icon;
         }));
       };
@@ -112,13 +115,13 @@
     play(audio.roulette, 0.25);
     play(audio.spin, 0.33);
 
-    // Independent result each spin, with a 30% jackpot chance and no persistent state.
-    const jackpot = Math.random() < 0.30;
+    // Independent result each spin, with a 50% jackpot chance and no persistent state.
+    const jackpot = Math.random() < 0.50;
     const jackpotSymbol = symbols[Math.floor(Math.random() * symbols.length)];
     const resultSymbols = jackpot
       ? [jackpotSymbol, jackpotSymbol, jackpotSymbol]
       : [symbols[Math.floor(Math.random() * symbols.length)], symbols[Math.floor(Math.random() * symbols.length)], symbols[Math.floor(Math.random() * symbols.length)]];
-    // Keep the configured jackpot rate at exactly 30% while never showing a losing triple.
+    // Keep the configured jackpot rate at exactly 50% while never showing a losing triple.
     if (!jackpot && resultSymbols[0] === resultSymbols[1] && resultSymbols[1] === resultSymbols[2]) {
       resultSymbols[2] = symbols[(symbols.indexOf(resultSymbols[2]) + 1) % symbols.length];
     }
@@ -137,6 +140,8 @@
     fadeOut(audio.spin, 350);
 
     if (jackpot) {
+      stopMusicGlow();
+      startMusicGlow();
       result.textContent = 'JACKPOT! FEVER TIME!';
       result.classList.add('jackpot');
       lastWin.textContent = '777';
@@ -144,7 +149,6 @@
       play(audio.win, 0.8);
       play(audio.coins, 0.52);
       setTimeout(() => { fadeOut(audio.win, 1000); fadeOut(audio.coins, 1200); audio.song.volume = 0; audio.song.currentTime = 0; audio.song.play().then(() => {
-        startMusicGlow();
         const start = performance.now();
         const rise = now => { audio.song.volume = Math.min(0.72, (now - start) / 1600 * 0.72); if (audio.song.volume < 0.72) requestAnimationFrame(rise); };
         requestAnimationFrame(rise);
