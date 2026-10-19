@@ -9,6 +9,50 @@
   const spinDuration = 7000;
   let busy = false;
   const reelTimers = [];
+  let audioContext;
+  let analyser;
+  let frequencyData;
+  let glowFrame;
+
+  function animateMusicGlow() {
+    if (!analyser || !frequencyData) return;
+    analyser.getByteFrequencyData(frequencyData);
+    const bassBins = Math.max(1, Math.floor(160 / (audioContext.sampleRate / analyser.fftSize)));
+    let bass = 0;
+    for (let i = 0; i < bassBins; i++) bass += frequencyData[i];
+    bass /= bassBins * 255;
+    const beat = Math.min(1, bass * 2.8);
+    document.documentElement.style.setProperty('--music-beat', beat.toFixed(3));
+    document.documentElement.style.setProperty('--music-opacity', (0.22 + beat * 0.72).toFixed(3));
+    document.documentElement.style.setProperty('--music-scale', (0.85 + beat * 0.3).toFixed(3));
+    glowFrame = requestAnimationFrame(animateMusicGlow);
+  }
+
+  function startMusicGlow() {
+    if (!audioContext) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      audioContext = new AudioContextClass();
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 1024;
+      analyser.smoothingTimeConstant = 0.72;
+      frequencyData = new Uint8Array(analyser.frequencyBinCount);
+      audioContext.createMediaElementSource(audio.song).connect(analyser);
+      analyser.connect(audioContext.destination);
+    }
+    audioContext.resume().catch(() => {});
+    cancelAnimationFrame(glowFrame);
+    document.querySelector('.arcade').classList.add('music-playing');
+    animateMusicGlow();
+  }
+
+  function stopMusicGlow() {
+    cancelAnimationFrame(glowFrame);
+    document.querySelector('.arcade').classList.remove('music-playing');
+    document.documentElement.style.setProperty('--music-beat', '0');
+    document.documentElement.style.setProperty('--music-opacity', '0');
+    document.documentElement.style.setProperty('--music-scale', '1');
+  }
 
   function fadeOut(element, milliseconds = 900) {
     if (!element) return;
@@ -100,11 +144,13 @@
       play(audio.win, 0.8);
       play(audio.coins, 0.52);
       setTimeout(() => { fadeOut(audio.win, 1000); fadeOut(audio.coins, 1200); audio.song.volume = 0; audio.song.currentTime = 0; audio.song.play().then(() => {
+        startMusicGlow();
         const start = performance.now();
         const rise = now => { audio.song.volume = Math.min(0.72, (now - start) / 1600 * 0.72); if (audio.song.volume < 0.72) requestAnimationFrame(rise); };
         requestAnimationFrame(rise);
       }).catch(() => {}); }, 1200);
     } else {
+      stopMusicGlow();
       result.textContent = 'ЕЩЁ ОДИН СПИН?';
       lastWin.textContent = '—';
       play(audio.lose, 0.8);
@@ -114,5 +160,6 @@
   }
 
   spinButton.addEventListener('click', spin);
+  audio.song.addEventListener('pause', stopMusicGlow);
   document.addEventListener('visibilitychange', () => { if (document.hidden) { audio.song.pause(); } });
 })();
