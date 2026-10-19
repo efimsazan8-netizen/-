@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#120c13">
+  <meta name="description" content="ДЖЕКПОТ (Богдан) — японский игровой автомат в духе 90-х.">
+  <title>ДЖЕКПОТ (Богдан)</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="arcade" aria-label="Игровой автомат ДЖЕКПОТ Богдан">
+    <div class="room-glow glow-left"></div><div class="room-glow glow-right"></div>
+    <header class="topbar"><span class="top-mark">花</span><span>ТЁМНЫЙ ЗАЛ · TOKYO 1998</span><span class="top-mark">七</span></header>
+    <section class="cabinet">
+      <div class="cabinet-top"><span class="screw"></span><div class="brand"><small>LUCKY STAR PRESENTS</small><h1>ДЖЕКПОТ <em>(Богдан)</em></h1><div class="brand-jp">ジャックポット — 運命の瞬間</div></div><span class="screw"></span></div>
+      <div class="marquee"><span class="marquee-star">✦</span><span>FEVER TIME</span><span class="marquee-star">✦</span></div>
+      <div class="screen-frame">
+        <div class="screen-top"><span>LUCKY STAR / No. 777</span><span class="live"><i></i> READY</span></div>
+        <div class="reels" aria-label="Результат вращения">
+          <div class="reel-window"><div class="reel" data-reel="0"><span class="symbol">🐈</span><span class="symbol">🔔</span><span class="symbol">🌸</span></div></div>
+          <div class="reel-window"><div class="reel" data-reel="1"><span class="symbol">🐠</span><span class="symbol">🎴</span><span class="symbol">7️⃣</span></div></div>
+          <div class="reel-window"><div class="reel" data-reel="2"><span class="symbol">🪭</span><span class="symbol">🌸</span><span class="symbol">🐈</span></div></div>
+        </div>
+        <div class="screen-caption"><span>◆</span> MATCH 3 TO HIT THE FEVER <span>◆</span></div>
+        <div class="result" id="result" aria-live="polite">ВСТАВЬ УДАЧУ · НАЖМИ SPIN</div>
+      </div>
+      <div class="payline"><span>✦</span><span>SEVEN</span><span>招き猫</span><span>SAKURA</span><span>✦</span></div>
+      <div class="controls">
+        <div class="meter"><span class="meter-label">CREDIT</span><span class="meter-value" id="credit">∞</span></div>
+        <button id="spin" class="spin-button" type="button"><span class="button-light"></span><span class="spin-word">SPIN</span><span class="spin-jp">運試し</span></button>
+        <div class="meter"><span class="meter-label">LAST WIN</span><span class="meter-value" id="last-win">—</span></div>
+      </div>
+      <div class="cabinet-foot"><span>NO COINS · JUST LUCK</span><span class="foot-lights"><i></i><i></i><i></i><i></i><i></i></span><span>GOOD VIBES ONLY</span></div>
+    </section>
+    <footer>РАЗВЛЕКАТЕЛЬНАЯ ИГРА · БЕЗ СТАВОК И РЕАЛЬНЫХ ВЫИГРЫШЕЙ</footer>
+  </main>
+  <audio id="roulette-audio" src="assets/roulette.mp3" preload="auto"></audio>
+  <audio id="spin-audio" src="assets/slots.mp3" preload="auto"></audio>
+  <audio id="lose-audio" src="assets/lose.mp3" preload="auto"></audio>
+  <audio id="win-audio" src="assets/jackpot.mp3" preload="auto"></audio>
+  <audio id="coins-audio" src="assets/coins.mp3" preload="auto"></audio>
+  <audio id="song-audio" src="assets/song.mp3" preload="auto" loop></audio>
+  <script src="app.js"></script>
+</body>
+</html>
