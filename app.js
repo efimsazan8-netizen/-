@@ -4,11 +4,11 @@
   const result = document.querySelector('#result');
   const cabinet = document.querySelector('.cabinet');
   const lastWin = document.querySelector('#last-win');
-  const audio = Object.fromEntries(['roulette','spin','lose','win','coins','song'].map(name => [name, document.querySelector(`#${name}-audio`)]));
+  const audio = Object.fromEntries(['roulette','spin','stop','lose','win','coins','song'].map(name => [name, document.querySelector(`#${name}-audio`)]));
   const symbols = ['🐈','🔔','🌸','🐠','🎴','7️⃣','🪭','🍒'];
   const spinDuration = 7000;
   let busy = false;
-  let rouletteFade;
+  const reelTimers = [];
 
   function fadeOut(element, milliseconds = 900) {
     if (!element) return;
@@ -49,31 +49,44 @@
     result.textContent = 'УДАЧА УЖЕ В ПУТИ…';
     cabinet.classList.remove('is-winning');
     reels.forEach((reel, i) => {
-      reel.replaceChildren(...Array.from({length: 5}, () => {
-        const icon = document.createElement('span'); icon.className = 'symbol'; icon.textContent = symbols[Math.floor(Math.random() * symbols.length)]; return icon;
-      }));
+      clearInterval(reelTimers[i]);
+      const refreshReel = () => {
+        reel.replaceChildren(...Array.from({length: 3}, () => {
+          const icon = document.createElement('span');
+          icon.className = 'symbol';
+          icon.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+          return icon;
+        }));
+      };
+      refreshReel();
+      reelTimers[i] = setInterval(refreshReel, 100);
       reel.classList.add('spinning');
       reel.style.animationDelay = `${i * 35}ms`;
     });
 
     audio.song.pause();
-    clearInterval(rouletteFade);
     play(audio.roulette, 0.25);
     play(audio.spin, 0.33);
 
-    // Independent result each spin: a modest jackpot chance, with no score or persistent state.
-    const jackpot = Math.random() < 0.035;
+    // Independent result each spin, with a 15% jackpot chance and no persistent state.
+    const jackpot = Math.random() < 0.15;
+    const jackpotSymbol = symbols[Math.floor(Math.random() * symbols.length)];
     const resultSymbols = jackpot
-      ? [symbols[Math.floor(Math.random() * symbols.length)]]
+      ? [jackpotSymbol, jackpotSymbol, jackpotSymbol]
       : [symbols[Math.floor(Math.random() * symbols.length)], symbols[Math.floor(Math.random() * symbols.length)], symbols[Math.floor(Math.random() * symbols.length)]];
-    if (jackpot) resultSymbols[1] = resultSymbols[2] = resultSymbols[0];
+    // Keep the configured jackpot rate at exactly 15% while never showing a losing triple.
+    if (!jackpot && resultSymbols[0] === resultSymbols[1] && resultSymbols[1] === resultSymbols[2]) {
+      resultSymbols[2] = symbols[(symbols.indexOf(resultSymbols[2]) + 1) % symbols.length];
+    }
 
     const stops = [5100, 6000, 6900];
     for (let i = 0; i < reels.length; i++) {
       await wait(stops[i] - (i ? stops[i - 1] : 0));
       reels[i].classList.remove('spinning');
+      clearInterval(reelTimers[i]);
       reels[i].classList.add('stopping');
       showSymbol(reels[i], resultSymbols[i]);
+      play(audio.stop, 0.45);
     }
     await wait(Math.max(0, spinDuration - stops[2]));
     fadeOut(audio.roulette, 350);
