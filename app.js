@@ -25,20 +25,22 @@
     bass /= bassBins * 255;
     if (bassFloor === undefined) bassFloor = bass;
     bassFloor += (bass - bassFloor) * 0.045;
-    const hit = Math.max(0, bass - bassFloor - 0.12);
-    const impact = Math.min(1, Math.pow(hit * 9, 1.25));
-    beatPulse = Math.max(impact, beatPulse * 0.88);
+    const hit = Math.max(0, bass - bassFloor - 0.18);
+    const impact = Math.min(1, Math.pow(hit * 12, 1.15));
+    beatPulse = Math.max(impact, beatPulse * 0.90);
     const beat = beatPulse;
     document.documentElement.style.setProperty('--music-beat', beat.toFixed(3));
-    document.documentElement.style.setProperty('--music-opacity', (0.34 + beat * 0.52).toFixed(3));
-    document.documentElement.style.setProperty('--music-scale', (1 + beat * 0.14).toFixed(3));
+    document.documentElement.style.setProperty('--music-opacity', (0.18 + beat * 0.78).toFixed(3));
+    document.documentElement.style.setProperty('--music-scale', (0.94 + beat * 0.22).toFixed(3));
+    document.documentElement.style.setProperty('--music-blur', `${32 + beat * 22}px`);
     glowFrame = requestAnimationFrame(animateMusicGlow);
   }
 
   function startMusicGlow() {
     document.querySelector('.arcade').classList.add('music-playing');
-    document.documentElement.style.setProperty('--music-opacity', '0.34');
-    document.documentElement.style.setProperty('--music-scale', '1');
+    document.documentElement.style.setProperty('--music-opacity', '0.18');
+    document.documentElement.style.setProperty('--music-scale', '0.94');
+    document.documentElement.style.setProperty('--music-blur', '32px');
     bassFloor = undefined;
     beatPulse = 0;
     if (!audioContext) {
@@ -90,10 +92,9 @@
   function showSymbol(reel, symbol) {
     reel.classList.remove('spinning', 'stopping');
     reel.replaceChildren();
-    const icon = document.createElement('img');
+    const icon = document.createElement('div');
     icon.className = 'symbol';
-    icon.src = symbol;
-    icon.alt = '';
+    icon.style.backgroundImage = `url("${new URL(symbol, document.baseURI).href}")`;
     reel.append(icon);
   }
 
@@ -110,10 +111,9 @@
       clearInterval(reelTimers[i]);
       const refreshReel = () => {
         reel.replaceChildren(...Array.from({length: 3}, () => {
-          const icon = document.createElement('img');
+          const icon = document.createElement('div');
           icon.className = 'symbol';
-          icon.src = symbols[Math.floor(Math.random() * symbols.length)];
-          icon.alt = '';
+          icon.style.backgroundImage = `url("${new URL(symbols[Math.floor(Math.random() * symbols.length)], document.baseURI).href}")`;
           return icon;
         }));
       };
