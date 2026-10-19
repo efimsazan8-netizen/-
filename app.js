@@ -112,13 +112,13 @@
     play(audio.roulette, 0.25);
     play(audio.spin, 0.33);
 
-    // Independent result each spin, with a 15% jackpot chance and no persistent state.
-    const jackpot = Math.random() < 0.15;
+    // Independent result each spin, with a 30% jackpot chance and no persistent state.
+    const jackpot = Math.random() < 0.30;
     const jackpotSymbol = symbols[Math.floor(Math.random() * symbols.length)];
     const resultSymbols = jackpot
       ? [jackpotSymbol, jackpotSymbol, jackpotSymbol]
       : [symbols[Math.floor(Math.random() * symbols.length)], symbols[Math.floor(Math.random() * symbols.length)], symbols[Math.floor(Math.random() * symbols.length)]];
-    // Keep the configured jackpot rate at exactly 15% while never showing a losing triple.
+    // Keep the configured jackpot rate at exactly 30% while never showing a losing triple.
     if (!jackpot && resultSymbols[0] === resultSymbols[1] && resultSymbols[1] === resultSymbols[2]) {
       resultSymbols[2] = symbols[(symbols.indexOf(resultSymbols[2]) + 1) % symbols.length];
     }
