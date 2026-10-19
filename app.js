@@ -79,9 +79,10 @@
   function showSymbol(reel, symbol) {
     reel.classList.remove('spinning', 'stopping');
     reel.replaceChildren();
-    const icon = document.createElement('span');
+    const icon = document.createElement('img');
     icon.className = 'symbol';
-    icon.textContent = symbol;
+    icon.src = symbol;
+    icon.alt = '';
     reel.append(icon);
   }
 
