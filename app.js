@@ -19,15 +19,15 @@
   function animateMusicGlow() {
     if (!analyser || !frequencyData) return;
     analyser.getByteFrequencyData(frequencyData);
-    const bassBins = Math.max(1, Math.floor(160 / (audioContext.sampleRate / analyser.fftSize)));
+    const bassBins = Math.max(1, Math.floor(240 / (audioContext.sampleRate / analyser.fftSize)));
     let bass = 0;
     for (let i = 0; i < bassBins; i++) bass += frequencyData[i];
     bass /= bassBins * 255;
     if (bassFloor === undefined) bassFloor = bass;
-    bassFloor += (bass - bassFloor) * 0.045;
-    const hit = Math.max(0, bass - bassFloor - 0.18);
-    const impact = Math.min(1, Math.pow(hit * 12, 1.15));
-    beatPulse = Math.max(impact, beatPulse * 0.90);
+    bassFloor += (bass - bassFloor) * 0.025;
+    const hit = Math.max(0, bass - bassFloor - 0.12);
+    const impact = Math.min(1, Math.pow(hit * 11, 1.15));
+    beatPulse = Math.max(impact, beatPulse * 0.88);
     const beat = beatPulse;
     document.documentElement.style.setProperty('--music-beat', beat.toFixed(3));
     document.documentElement.style.setProperty('--music-opacity', (0.18 + beat * 0.78).toFixed(3));
